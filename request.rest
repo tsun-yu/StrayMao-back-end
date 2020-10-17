@@ -1,0 +1,8 @@
+
+GET http://localhost:3000/address-book/verify2
+
+
+###
+
+GET http://localhost:3000/address-book/verify2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWQiOjEsImFjY291bnQiOiJzaGluZGVyIiwibmlja25hbWUiOiLlsI_mlrAiLCJpYXQiOjE2MDE0NTM4NTh9.ZqIZ_Xhr-myOoItg5y1BmpPk2Vbs4AV0wtcDRIPH4Ss
