@@ -32,7 +32,7 @@ DB_PASS= // Your Password
 DB_NAME= // DB name
 ```
 
-![example](./data/example.png "example") 6. Now you can run node server and try to link <http://localhost:3000/route/>
+![example](./data/example.png "example") 6. Now you can run node server and try to link <http://localhost:3000//>
 you'll see somemessage like "there is route master" 7. Watch your file directory
 ![code here](./data/code_here.png "Code Here")
 main.js is the place where you should code your own function here!
