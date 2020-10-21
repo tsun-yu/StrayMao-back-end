@@ -38,7 +38,7 @@ app.use(session({
     }
 }));
 app.use((req, res, next)=>{
-    res.locals.title = '小新購物網';
+    res.locals.title = 'StaryMao寵愛有家';
     res.locals.sess = req.session;
 
     let auth = req.get('Authorization');
@@ -59,7 +59,8 @@ app.get('/', (req, res)=>{
     // res.send('<h2>Hola </h2>');
     res.render('home', {name: 'Shinder'});
 });
-app.use('/route',require(__dirname + '/routes/routesmaster'));
+app.use('/starymao',require(__dirname + '/routes/routesmaster'));
+// app.use('/store',require(__dirname + '/routes/store/main.js'));
 
 app.use( express.static(__dirname + '/../public'));
 
@@ -70,7 +71,7 @@ app.use((req, res )=>{
         .send('找不到網頁');
 });
 
-app.listen(3000, ()=>{
+app.listen(3001, ()=>{
     console.log('伺服器已啟動...');
 })
 
