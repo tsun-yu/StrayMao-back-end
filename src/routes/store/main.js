@@ -4,7 +4,7 @@ const db = require(__dirname + '/../../db_connect2');
 const router = express.Router();
 
 router.get('/', (req, res)=>{
-    res.send('routes_store')
+    res.send('routes_store嗨嗨，商店喔')
 });
 
 //exapmle for get data from database
