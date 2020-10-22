@@ -7,3 +7,4 @@ node_modules
 .eslintignore
 package-lock.json
 ./package-lock.json
+request.rest
