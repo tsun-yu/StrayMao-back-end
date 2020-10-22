@@ -24,15 +24,15 @@ npm i
 
 4. create a .env file
 5. set up .env file to link database
-
 ```
 DB_HOST= // *Write your db host*
 DB_USER= // Your Account
 DB_PASS= // Your Password
 DB_NAME= // DB name
 ```
-
 ![example](./data/example.png "example") 
+
+
 6. Now you can run node server and try to link <http://localhost:3000/starymao/>
 you'll see somemessage like "there is route master" 
 7. Watch your file directory
