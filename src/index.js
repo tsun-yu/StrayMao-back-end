@@ -72,7 +72,7 @@ app.use((req, res )=>{
 });
 
 app.listen(3001, ()=>{
-    console.log('伺服器已啟動...');
+    console.log('伺服器已啟動(´・ω・`)...(`・ω・´)');
 })
 
 /*

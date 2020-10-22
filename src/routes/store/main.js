@@ -9,7 +9,7 @@ router.get('/', (req, res)=>{
 
 //exapmle for get data from database
 router.get('/try-db', (req, res)=>{
-    db.query('SELECT * FROM address_book LIMIT 2')
+    db.query('SELECT * FROM shopgoods LIMIT 2')
     .then(([results])=>{
         res.json(results);
     })
