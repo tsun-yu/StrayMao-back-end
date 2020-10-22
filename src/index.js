@@ -57,7 +57,7 @@ app.use((req, res, next)=>{
 })
 app.get('/', (req, res)=>{
     // res.send('<h2>Hola </h2>');
-    res.render('home', {name: 'Shinder'});
+    res.render('home', {name: 'ㄤㄤ，想要來點毛毛ㄇ(つ´ω`)つ?'});
 });
 app.use('/starymao',require(__dirname + '/routes/routesmaster'));
 // app.use('/store',require(__dirname + '/routes/store/main.js'));

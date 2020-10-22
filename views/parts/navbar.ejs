@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/address-book/list">資料列表</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/address-book/add">新增資料</a>
+                </li>
+
+            </ul>
+            <ul class="navbar-nav">
+                <% if(sess.admin){ %>
+                    <li class="nav-item active">
+                        <a class="nav-link"><%= sess.admin.nickname %></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/address-book/logout">登出</a>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/address-book/login">登入</a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
