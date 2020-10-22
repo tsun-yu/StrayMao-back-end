@@ -23,7 +23,7 @@ app.use( express.json() );
 const corsOptions = {
     credentials: true,
     origin: function(origin, cb){
-        console.log(`origin: ${origin}`);
+        // console.log(`origin: ${origin}`);
         cb(null, true);
     }
 };
@@ -68,7 +68,7 @@ app.use((req, res )=>{
     res
         .type('text/plain')
         .status(404)
-        .send('找不到網頁');
+        .send('找不到網頁_(:3 」∠ )_');
 });
 
 app.listen(3001, ()=>{
