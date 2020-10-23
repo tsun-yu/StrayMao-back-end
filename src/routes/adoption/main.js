@@ -72,7 +72,6 @@ router.get('/get_pet_list/:petId', (req, res) => {
         petArray[j] = obj;
       }
     }
-    // petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
     res.json({ data: petArray, results: 'seccess' });
   });
 });
@@ -81,7 +80,6 @@ router.get('/get_place/', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE 1`
   ).then(([results]) => {
-    // petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
     res.json({ data: results, results: 'seccess' });
   });
 });
@@ -90,7 +88,6 @@ router.get('/get_place/:placeId', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE mapId = ${req.params.placeId}`
   ).then(([results]) => {
-    // petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
     res.json({ data: results, results: 'seccess' });
   });
 });
