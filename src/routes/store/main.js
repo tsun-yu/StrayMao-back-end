@@ -36,6 +36,32 @@ router.post('/goods', upload.array('goodsImgs'), async (req, res)=>{
     });
 });
 
+
+//評價get
+router.get('/goods/evaluation', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsEvaluationId, goodsEvaluationMemberId, goodsEvaluationMemberName, goodsEvaluation, goodsStarts, goodsEvaluationCreateAt FROM goodsevaluation WHERE 1 ORDER BY `goodsevaluation`.`goodsEvaluationId` DESC')
+    .then(([results])=>{
+        res.json(results);
+    })
+});
+//評價post
+router.post('/goods/evaluation', async (req, res)=>{
+    const data = {...req.body};
+    data.goodsImgs = JSON.stringify(goodsImgsArray);
+    data.createAt = new Date();
+    const sql = "INSERT INTO `goodsevaluation` set ?";
+    const [{affectedRows, insertId}] = await db.query(sql, [ data ]);
+    // [{"fieldCount":0,"affectedRows":1,"insertId":860,"info":"","serverStatus":2,"warningStatus":1},null]
+
+    res.json({
+        success: !!affectedRows,
+        affectedRows,
+        insertId,
+        file: data.goodsImgs,
+    });
+});
+
 // router.post('/add', upload.none(), async (req, res)=>{
 //     const data = {...req.body};
 //     data.created_at = new Date();
