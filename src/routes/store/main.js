@@ -64,7 +64,7 @@ router.get('/goods/cat', (req, res)=>{
 //get價格高到低
 router.get('/goods/priceU', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` ASC')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` DESC')
     // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
         res.json(results);
@@ -72,9 +72,9 @@ router.get('/goods/priceU', (req, res)=>{
 });
 
 //get價格低到高
-router.get('/goods/priceU', (req, res)=>{
+router.get('/goods/priceD', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` DESC')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` ASC')
     // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
         res.json(results);
