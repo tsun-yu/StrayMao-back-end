@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
-const {v4: uuidv4} = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
@@ -12,68 +12,67 @@ const moment = require('moment-timezone');
 const cors = require('cors');
 const db = require(__dirname + '/db_connect2');
 const sessionStore = new MysqlStore({}, db);
-const upload = multer({dest: __dirname + '/../tmp_uploads'});
+const upload = multer({ dest: __dirname + '/../tmp_uploads' });
 
 const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use( express.urlencoded({extended: false}) );
-app.use( express.json() );
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 const corsOptions = {
-    credentials: true,
-    origin: function(origin, cb){
-        // console.log(`origin: ${origin}`);
-        cb(null, true);
-    }
+  credentials: true,
+  origin: function (origin, cb) {
+    // console.log(`origin: ${origin}`);
+    cb(null, true);
+  },
 };
 app.use(cors(corsOptions));
-app.use(session({
+app.use(
+  session({
     saveUninitialized: false,
     resave: false,
     secret: 'jghdkasskjfks37848kj',
     store: sessionStore,
     cookie: {
-        maxAge: 1200000
-    }
-}));
-app.use((req, res, next)=>{
-    res.locals.title = 'StaryMao寵愛有家';
-    res.locals.sess = req.session;
+      maxAge: 1200000,
+    },
+  })
+);
+app.use((req, res, next) => {
+  res.locals.title = 'StaryMao寵愛有家';
+  res.locals.sess = req.session;
 
-    let auth = req.get('Authorization');
+  let auth = req.get('Authorization');
 
-    if(auth && auth.indexOf('Bearer ')===0){
-        auth = auth.slice(7);
-        jwt.verify(auth, process.env.TOKEN_SECRET, function(error, payload){
-            if(!error){
-                req.bearer = payload;
-            }
-            next();
-        });
-    } else {
-        next();
-    }
-})
-app.get('/', (req, res)=>{
-    // res.send('<h2>Hola </h2>');
-    res.render('home', {name: 'ㄤㄤ，想要來點毛毛ㄇ(つ´ω`)つ?'});
+  if (auth && auth.indexOf('Bearer ') === 0) {
+    auth = auth.slice(7);
+    jwt.verify(auth, process.env.TOKEN_SECRET, function (error, payload) {
+      if (!error) {
+        req.bearer = payload;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
 });
-app.use('/starymao',require(__dirname + '/routes/routesmaster'));
+app.get('/', (req, res) => {
+  // res.send('<h2>Hola </h2>');
+  res.render('home', { name: 'ㄤㄤ，想要來點毛毛ㄇ(つ´ω`)つ?' });
+});
+app.use('/starymao', require(__dirname + '/routes/routesmaster'));
 // app.use('/store',require(__dirname + '/routes/store/main.js'));
 
-app.use( express.static(__dirname + '/../public'));
+app.use(express.static(__dirname + '/../public'));
 
-app.use((req, res )=>{
-    res
-        .type('text/plain')
-        .status(404)
-        .send('找不到網頁_(:3 」∠ )_');
+app.use((req, res) => {
+  res.type('text/plain').status(404).send('找不到網頁_(:3 」∠ )_');
 });
 
-app.listen(3001, ()=>{
-    console.log('伺服器已啟動(´・ω・`)...(`・ω・´)');
-})
+app.listen(3001, (value) => {
+  console.log('伺服器(Port:3001)已啟動(´・ω・`)...(`・ω・´)');
+});
 
 /*
 app.get('/json-sales', (req, res)=>{
