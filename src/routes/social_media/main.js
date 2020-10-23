@@ -1,6 +1,8 @@
 const express = require('express');
-
+const moment = require('moment-timezone');
 const db = require(__dirname + '/../../db_connect2');
+const upload = require(__dirname + '/../../upload-img-module');
+
 const router = express.Router();
 
 router.get('/', (req, res)=>{
@@ -14,6 +16,14 @@ router.get('/try-db', (req, res)=>{
         res.json(results);
     })
 });
+
+router.get('/list',(req, res)=>{
+    res.render('social_media/list');
+});
+
+
+
+
 module.exports = router;
 
 

@@ -1,0 +1,142 @@
+<%- include('../parts/html-head.ejs') %>
+<%- include('../parts/navbar.ejs') %>
+<style>
+    span.red-stars {
+        color: red;
+    }
+     
+    small.error-msg {
+        color: red;
+    }
+</style>
+<div class="container">
+    <div class="row d-flex justify-content-center">
+             <div class="col-lg-6 col-sm-12">
+                 <div id="infobar" class="alert alert-success" role="alert" style="display: none">
+                 </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">新增資料</h5>
+                    <form name="form1" onsubmit="checkForm(); return false;" novalidate>
+                        <div class="form-group">
+                            <label for="name"><span class="red-stars">**</span> name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <small class="form-text error-msg"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="email"><span class="red-stars">**</span> email</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                            <small class="form-text error-msg"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile"><span class="red-stars">**</span> mobile</label>
+                            <input type="tel" class="form-control" id="mobile" name="mobile" pattern="09\d{2}-?\d{3}-?\d{3}">
+                            <small class="form-text error-msg"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthday">birthday</label>
+                            <input type="date" class="form-control" id="birthday" name="birthday">
+                        </div>
+                        <div class="form-group">
+                            <label for="address">address</label>
+                            <textarea class="form-control" name="address" id="address" cols="30" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../parts/scripts.ejs') %>
+<script>
+    const email_pattern = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    const mobile_pattern = /^09\d{2}-?\d{3}-?\d{3}$/;
+    const $name = document.querySelector('#name');
+    const $email = document.querySelector('#email');
+    const $mobile = document.querySelector('#mobile');
+    const r_fields = [$name, $email, $mobile];
+    /*javascript
+    const infobar = document.querySelector('#infobar');*/
+    //jQuery
+    const infobar = $('#infobar');
+    const submitBtn = document.querySelector('button[type=submit]');
+
+    function checkForm() {
+        let isPass = true;
+
+        r_fields.forEach(el => {
+            el.style.borderColor = '#CCCCCC';
+            el.nextElementSibling.innerHTML = '';
+        });
+        // submitBtn.style.display = 'none';
+        // TODO: 檢查資料格式
+        if ($name.value.length < 2) {
+            isPass = false;
+            $name.style.borderColor = 'red';
+            $name.nextElementSibling.innerHTML = '請填寫正確的姓名';
+        }
+
+        if (!email_pattern.test($email.value)) {
+            isPass = false;
+            $email.style.borderColor = 'red';
+            $email.nextElementSibling.innerHTML = '請填寫正確格式的電子郵箱';
+        }
+
+        if (!mobile_pattern.test($mobile.value)) {
+            isPass = false;
+            $mobile.style.borderColor = 'red';
+            $mobile.nextElementSibling.innerHTML = '請填寫正確的手機號碼';
+        }
+
+        if (isPass) {
+            const fd = new FormData(document.form1);
+
+            fetch('', {
+                method: 'POST',
+                body: fd
+            })
+                .then(r => r.json())
+                .then(obj => {
+                    console.log(obj);
+                    if (obj.success) {
+                        /* Javascript
+                        infobar.innerHTML = '新增成功';
+                        infobar.className = "alert alert-success";
+                        // if(infobar.classList.contains('alert-danger')){
+                        //     infobar.classList.replace('alert-danger', 'alert-success')
+                        // }
+                        setTimeout(() => {
+                            location.href = 'data-list.php';
+                        }, 3000) */
+                        //jQuery改寫
+                        infobar.html('新增成功');
+                        infobar.removeClass('alert-danger').addClass('alert-success');
+                    } else {
+                        /*
+                        infobar.innerHTML = obj.error || '新增失敗';
+                        infobar.className = "alert alert-danger"; */
+                        //jQuery改寫
+                        infobar.html(obj.error || '新增失敗');
+                        infobar.removeClass('alert-success').addClass('alert-danger');
+                        // if(infobar.classList.contains('alert-success')){
+                        //     infobar.classList.replace('alert-success', 'alert-danger')
+                        // }
+                        submitBtn.style.display = 'block';
+                    }
+                    // infobar.style.display = 'block';
+                    infobar.slideDown();
+                    setTimeout(()=>{
+                        infobar.slideUp();
+                    },3000)
+                });
+
+        } else {
+            submitBtn.style.display = 'block';
+        }
+    }
+</script>
+<%- include('../parts/html-foot.ejs') %>
