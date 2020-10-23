@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const db = require(__dirname + '/../../db_connect2');
 const router = express.Router();
+const upload = require(__dirname + '/../../upload-img-module');
+
 
 
 router.get('/', (req, res)=>{
@@ -11,22 +13,15 @@ router.get('/', (req, res)=>{
 //exapmle for get data from database
 router.get('/goods', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` DESC')
     .then(([results])=>{
         res.json(results);
     })
 });
 
-router.get('/goods', (req, res)=>{
-    // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1')
-    .then(([results])=>{
-        res.json(results);
-    })
-});
-
-router.post('/goods', async (req, res)=>{
+router.post('/goods', upload.single('goodsImgs'), async (req, res)=>{
     const data = {...req.body};
+    data.goodsImgs = req.file.filename;
     data.createAt = new Date();
     const sql = "INSERT INTO `shopgoods` set ?";
     const [{affectedRows, insertId}] = await db.query(sql, [ data ]);
@@ -36,6 +31,7 @@ router.post('/goods', async (req, res)=>{
         success: !!affectedRows,
         affectedRows,
         insertId,
+        file:req.file.filename,
     });
 });
 
