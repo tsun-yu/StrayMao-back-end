@@ -19,9 +19,10 @@ router.get('/goods', (req, res)=>{
     })
 });
 
-router.post('/goods', upload.single('goodsImgs'), async (req, res)=>{
+router.post('/goods', upload.array('goodsImgs'), async (req, res)=>{
+    const goodsImgsArray = req.files.map(f => f.filename);
     const data = {...req.body};
-    data.goodsImgs = req.file.filename;
+    data.goodsImgs = JSON.stringify(goodsImgsArray);
     data.createAt = new Date();
     const sql = "INSERT INTO `shopgoods` set ?";
     const [{affectedRows, insertId}] = await db.query(sql, [ data ]);
@@ -31,7 +32,7 @@ router.post('/goods', upload.single('goodsImgs'), async (req, res)=>{
         success: !!affectedRows,
         affectedRows,
         insertId,
-        file:req.file.filename,
+        file: data.goodsImgs,
     });
 });
 
