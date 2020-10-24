@@ -11,14 +11,88 @@ router.get('/', (req, res)=>{
 });
 
 //exapmle for get data from database
+//get最新商品
+router.get('/goods/news', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` DESC')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get熱門商品
+router.get('/goods/sale', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`sale` DESC')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get特價商品
+router.get('/goods/discount', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE discount<1')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get狗商品
+router.get('/goods/dog', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=1 OR categoryId=2')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get貓商品
+router.get('/goods/cat', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=3 OR categoryId=4')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get價格高到低
+router.get('/goods/priceU', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` DESC')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    }) 
+});
+
+//get價格低到高
+router.get('/goods/priceD', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`price` ASC')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+//get商品詳細資訊
 router.get('/goods', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
     db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` DESC')
+    // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
         res.json(results);
     })
+    
 });
 
+//post商品詳細資訊
 router.post('/goods', upload.array('goodsImgs'), async (req, res)=>{
     const goodsImgsArray = req.files.map(f => f.filename);
     const data = {...req.body};
@@ -35,6 +109,17 @@ router.post('/goods', upload.array('goodsImgs'), async (req, res)=>{
         file: data.goodsImgs,
     });
 });
+
+
+//評價get
+router.get('/goods/evaluation', (req, res)=>{
+    // db.query('SELECT * FROM shopgoods LIMIT 2')
+    db.query('SELECT goodsEvaluationId, goodsEvaluationMemberId, goodsEvaluationMemberName, goodsEvaluation, goodsStarts, goodsEvaluationCreateAt FROM goodsevaluation WHERE 1 ORDER BY `goodsevaluation`.`goodsEvaluationId` DESC')
+    .then(([results])=>{
+        res.json(results);
+    })
+});
+
 
 // router.post('/add', upload.none(), async (req, res)=>{
 //     const data = {...req.body};

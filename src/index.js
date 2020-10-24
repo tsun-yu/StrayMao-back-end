@@ -40,7 +40,7 @@ app.use(
   })
 );
 app.use((req, res, next) => {
-  res.locals.title = 'StaryMao寵愛有家';
+  res.locals.title = 'StrayMao寵愛有家';
   res.locals.sess = req.session;
 
   let auth = req.get('Authorization');
@@ -61,7 +61,7 @@ app.get('/', (req, res) => {
   // res.send('<h2>Hola </h2>');
   res.render('home', { name: 'ㄤㄤ，想要來點毛毛ㄇ(つ´ω`)つ?' });
 });
-app.use('/starymao', require(__dirname + '/routes/routesmaster'));
+app.use('/straymao', require(__dirname + '/routes/routesmaster'));
 // app.use('/store',require(__dirname + '/routes/store/main.js'));
 
 app.use(express.static(__dirname + '/../public'));
