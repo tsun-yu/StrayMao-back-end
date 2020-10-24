@@ -9,5 +9,3 @@ package-lock.json
 ./package-lock.json
 request.rest
 **/.DS_Store
-bootstrap
-fontawesome
