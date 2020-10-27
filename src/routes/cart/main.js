@@ -16,7 +16,7 @@ router.get('/try-db', (req, res)=>{
 });
 
 
-router.get('/cart/list', (req, res)=>{
+router.get('/cartlist', (req, res)=>{
     // db.query('SELECT * FROM cartlist LIMIT 2')
     db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` DESC')
     // db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` ASC')
@@ -39,7 +39,7 @@ router.get('/cart/list', (req, res)=>{
 // orderState
 
 
-router.get('/order/list', (req, res)=>{
+router.get('/orderlist', (req, res)=>{
     // db.query('SELECT * FROM orderlist LIMIT 2')
     db.query('SELECT orderId, memberId, totalPrice, createAt, memberName, address, mobile FROM orderlist WHERE 1 ORDER BY `orderlist`.`orderId` DESC')
     // db.query('SELECT orderId, memberId, totalPrice, createAt, memberName, address, mobile FROM orderlist WHERE 1 ORDER BY `orderlist`.`orderId` ASC')
