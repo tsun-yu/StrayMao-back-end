@@ -16,6 +16,16 @@ router.get('/try-db', (req, res) => {
 
 let petInfoTable = null;
 
+router.get('/test_list/', (req, res) => {
+  let arr = [];
+  for (let i = 0; i < 100; i++) {
+    arr.push({ id: i, text: `hello ${i}` });
+  }
+  let data = { data: arr, results: 'success' };
+  // res.json(data);
+  res.json({ data: data, results: 'success' });
+});
+
 router.get('/get_pet_list/', (req, res) => {
   db.query(
     `SELECT a.* , c.des as tag 
@@ -40,7 +50,8 @@ router.get('/get_pet_list/', (req, res) => {
       }
     }
     //petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
-    res.json(petArray);
+    // res.json(petArray);
+    res.json({ data: petArray, results: 'success' });
   });
 });
 
@@ -72,7 +83,7 @@ router.get('/get_pet_list/:petId', (req, res) => {
         petArray[j] = obj;
       }
     }
-    res.json({ data: petArray, results: 'seccess' });
+    res.json({ data: petArray, results: 'success' });
   });
 });
 
@@ -80,7 +91,7 @@ router.get('/get_place/', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE 1`
   ).then(([results]) => {
-    res.json({ data: results, results: 'seccess' });
+    res.json({ data: results, results: 'success' });
   });
 });
 
@@ -88,7 +99,41 @@ router.get('/get_place/:placeId', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE mapId = ${req.params.placeId}`
   ).then(([results]) => {
-    res.json({ data: results, results: 'seccess' });
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.post('/pet_heart', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  // console.log(typeof userId);
+  // console.log(userId);
+  const url = `INSERT INTO heartList( type, memberId, itemId) 
+               VALUES (3,${userId},${petId}) `;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.delete('/pet_heart', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  const url = `DELETE FROM heartList
+                where itemId = ${petId} 
+                  and memberId = ${userId}
+                  and type = 3
+                  `;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.post('/pet_heart_init', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  const url = `select listId FROM heartList
+                where itemId = ${petId} 
+                  and memberId = ${userId}
+                  and type = 3`;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
   });
 });
 
