@@ -27,7 +27,7 @@ router.get('/goods/sale', (req, res)=>{
     db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`sale` DESC')
     // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
-        res.json(results);
+        res.json({ data: results, results: 'success' });
     })    
 });
 
