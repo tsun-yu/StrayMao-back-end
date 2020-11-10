@@ -14,6 +14,50 @@ router.get('/try-db', (req, res)=>{
         res.json(results);
     })
 });
+
+
+router.get('/cartlist', (req, res)=>{
+    // db.query('SELECT * FROM cartlist LIMIT 2')
+    db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` DESC')
+    // db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+// cartlist完整內容	
+// cartId
+// goodsId
+// memberId
+// name
+// price
+// quantity
+// createAt
+// orderId
+// isBuy
+// buyNow
+// orderState
+
+
+router.get('/orderlist', (req, res)=>{
+    // db.query('SELECT * FROM orderlist LIMIT 2')
+    db.query('SELECT orderId, memberId, totalPrice, createAt, memberName, address, mobile FROM orderlist WHERE 1 ORDER BY `orderlist`.`orderId` DESC')
+    // db.query('SELECT orderId, memberId, totalPrice, createAt, memberName, address, mobile FROM orderlist WHERE 1 ORDER BY `orderlist`.`orderId` ASC')
+    .then(([results])=>{
+        res.json(results);
+    })    
+});
+
+// orderlist完整內容	
+// orderId
+// memberId
+// totalPrice
+// createAt
+// memberName
+// address
+// mobile
+
+
 module.exports = router;
 
 

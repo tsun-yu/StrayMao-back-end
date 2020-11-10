@@ -16,32 +16,86 @@ router.get('/try-db', (req, res) => {
 
 let petInfoTable = null;
 
-router.get('/get_pet_list/', (req, res) => {
+router.get('/test_list/', (req, res) => {
+  let arr = [];
+  for (let i = 0; i < 100; i++) {
+    arr.push({ id: i, text: `hello ${i}` });
+  }
+  let data = { data: arr, results: 'success' };
+  // res.json(data);
+  res.json({ data: data, results: 'success' });
+});
+
+router.get('/get_pet_list/m/:memberId?', (req, res) => {
   db.query(
     `SELECT a.* , c.des as tag 
      FROM petInfo a join petDetail b on a.petId = b.petId 
                     join tagList c on b.tagId = c.tagId and c.typeId = 1
      WHERE 1`
-  ).then(([results]) => {
-    //還要做資料整理 把同id的動物的tag變成array
-    petInfoTable = results;
-    let petIndex = petInfoTable[0];
-    let petDataRow = petIndex;
-    petDataRow.tag = [petDataRow.tag];
-    let petArray = [petDataRow];
-    for (let i = 1, j = 0; i < petInfoTable.length; i++) {
-      if (petInfoTable[i].petId == petInfoTable[i - 1].petId) {
-        petArray[j].tag.push(petInfoTable[i].tag);
-      } else {
-        j++;
-        obj = petInfoTable[i];
-        obj.tag = [obj.tag];
-        petArray[j] = obj;
+  )
+    .then(([results]) => {
+      // console.log(results);
+      let userId = 0;
+      if (req.params.memberId !== undefined) {
+        userId = req.params.memberId;
+        return db.query(
+          `SELECT a.* , c.des as tag,d.memberId as heart 
+          FROM petInfo a join petDetail b on a.petId = b.petId 
+                         join tagList c on b.tagId = c.tagId and c.typeId = 1
+                        left  JOIN heartList d on d.itemId = a.petId and d.type = 3 and d.memberId = ${userId}
+          WHERE 1 order by a.petId`
+        );
       }
-    }
-    //petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
-    res.json(petArray);
-  });
+      //還要做資料整理 把同id的動物的tag變成array
+      petInfoTable = results;
+      let petIndex = petInfoTable[0];
+      let petDataRow = petIndex;
+      petDataRow.tag = [petDataRow.tag];
+      let petArray = [petDataRow];
+      for (let i = 1, j = 0; i < petInfoTable.length; i++) {
+        if (petInfoTable[i].petId == petInfoTable[i - 1].petId) {
+          petArray[j].tag.push(petInfoTable[i].tag);
+        } else {
+          j++;
+          obj = petInfoTable[i];
+          obj.heart = false;
+          obj.tag = [obj.tag];
+          petArray[j] = obj;
+        }
+      }
+      //petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
+      return { data: petArray, results: 'success' };
+    })
+    .then((data) => {
+      // console.log('data:', [...data][0]);
+      // console.log('data:', data.results);
+
+      if (data.results === undefined) {
+        // //還要做資料整理 把同id的動物的tag變成array
+        let results = [...data][0];
+        petInfoTable = results;
+        let petIndex = petInfoTable[0];
+        let petDataRow = petIndex;
+        petDataRow.heart = petInfoTable[0].heart > 0 ? true : false;
+        petDataRow.tag = [petDataRow.tag];
+        let petArray = [petDataRow];
+
+        for (let i = 1, j = 0; i < petInfoTable.length; i++) {
+          if (petInfoTable[i].petId == petInfoTable[i - 1].petId) {
+            petArray[j].tag.push(petInfoTable[i].tag);
+          } else {
+            j++;
+            obj = petInfoTable[i];
+            obj.heart = petInfoTable[i].heart > 0 ? true : false;
+            obj.tag = [obj.tag];
+            petArray[j] = obj;
+          }
+        }
+        res.json({ data: petArray, results: 'success' });
+      } else {
+        res.json(data);
+      }
+    });
 });
 
 router.get('/get_pet_list/:petId', (req, res) => {
@@ -72,7 +126,7 @@ router.get('/get_pet_list/:petId', (req, res) => {
         petArray[j] = obj;
       }
     }
-    res.json({ data: petArray, results: 'seccess' });
+    res.json({ data: petArray, results: 'success' });
   });
 });
 
@@ -80,7 +134,7 @@ router.get('/get_place/', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE 1`
   ).then(([results]) => {
-    res.json({ data: results, results: 'seccess' });
+    res.json({ data: results, results: 'success' });
   });
 });
 
@@ -88,7 +142,41 @@ router.get('/get_place/:placeId', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE mapId = ${req.params.placeId}`
   ).then(([results]) => {
-    res.json({ data: results, results: 'seccess' });
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.post('/pet_heart', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  // console.log(typeof userId);
+  // console.log(userId);
+  const url = `INSERT INTO heartList( type, memberId, itemId) 
+               VALUES (3,${userId},${petId}) `;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.delete('/pet_heart', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  const url = `DELETE FROM heartList
+                where itemId = ${petId} 
+                  and memberId = ${userId}
+                  and type = 3
+                  `;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
+router.post('/pet_heart_init', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+  const url = `select listId FROM heartList
+                where itemId = ${petId} 
+                  and memberId = ${userId}
+                  and type = 3`;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
   });
 });
 
