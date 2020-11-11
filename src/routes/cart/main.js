@@ -1,3 +1,4 @@
+const { json } = require('express');
 const express = require('express');
 
 const db = require(__dirname + '/../../db_connect2');
@@ -61,7 +62,6 @@ router.post('/goods_heart_init', (req, res) => {
 
 //購物車
 //post store/goods資料到cartlist (放store/main.js？)
-
 router.post('/cartinsert', (req, res) => {
     const memberId = req.body.memberId;
     const goodsId = req.body.goodsId;
@@ -82,35 +82,49 @@ router.post('/cartlist', (req, res) => {
     const goodsId = req.body.goodsId;
     // console.log(typeof userId);
     // console.log(userId);
-    const url = `SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE memberId=${memberId} `;
+    const url = `SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE memberId=${memberId} and isBuy=0 `;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
 });
 
 router.post('/cartupdate', (req, res) => {
-    const cartId= req.body.cartId;
-    const memberId = req.body.memberId;
-    const goodsId = req.body.goodsId;
-    const name = req.body.name;
-    const price = req.body.price;
-    const quantity = req.body.quantity;
+    console.log('req.body',req.body);
+
+    for (let i = 0; i < req.body.length; i++ ){
+        console.log('data',req.body[i]);
+
+        const url = `UPDATE cartlist SET buyNow=${1}, quantity=${req.body[i].quantity} WHERE cartId=${req.body[i].cartId}`;
+    db.query(url).then(([results]) => {
+    //   res.json({ data: results, results: 'success' });
+    });
+    }
+
+
+    // const cartId= req.body.cartId;
+    // const memberId = req.body.memberId;
+    // const goodsId = req.body.goodsId;
+    // const name = req.body.name;
+    // const price = req.body.price;
+    // const quantity = req.body.quantity;
+
+
     // console.log(typeof userId);
     // console.log(userId);
     //update `cart_list_01` set `quantity`=? WHERE `goods_id`=$goods_id
-    const url = `UPDATE cartlist SET price=${price}, quantity=${quantity}, createAt=NOW() WHERE cartId=${cartId}`;
-    db.query(url).then(([results]) => {
-      res.json({ data: results, results: 'success' });
-    });
+
+
+
+    
+
+    res.json({data:'good job'});
 });
 
 router.delete('/cartlist', (req, res) => {
     const memberId = req.body.memberId;
     const cartId = req.body.cartId;
     const url = `DELETE FROM cartlist
-                  where cartId = ${cartId} 
-                    and memberId = ${memberId}
-                    `;
+                  where cartId = ${cartId}`;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
@@ -158,16 +172,7 @@ router.delete('/cartlist', (req, res) => {
 
 //購買
 //(update 購物車資料到cartlist)
-
-
-
-
-
-//訂單
-//post 購買頁面表單資料 到orderlist
-
 router.post('/orderinsert', (req, res) => {
-    const orderId = req.body.orderId;
     const memberId = req.body.memberId;
     const totalPrice = req.body.totalPrice;
     const memberName = req.body.memberName;
@@ -178,12 +183,50 @@ router.post('/orderinsert', (req, res) => {
     // console.log(typeof userId);
     // console.log(userId);
     const url = `INSERT INTO orderlist(orderId, memberId, totalPrice, createAt, memberName, address, mobile, orderState, productDelivery, paymentTerm ) 
-     VALUES (${orderId}, ${memberId}, ${totalPrice}, NOW(), ${memberName}, ${address}, ${mobile}, ?, ${productDelivery}, ${paymentTerm}) `;
+     VALUES (?, ${memberId}, ${totalPrice}, NOW(), ${memberName}, ${address}, ${mobile}, ?, ${productDelivery}, ${paymentTerm}) `;//要update cartlist的orderId & buyNow=1
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
 });
 
+router.post('/orderupdate', (req, res) => {
+    const cartId = req.body.cartId;
+    const price = req.body.price;
+    const quantity = req.body.quantity;
+    // console.log(typeof userId);
+    // console.log(userId);
+    const url = `UPDATE cartlist SET price=${price}, quantity=${quantity}, createAt=NOW() WHERE cartId=${cartId}`;
+    db.query(url).then(([results]) => {
+      res.json({ data: results, results: 'success' });
+    });
+});
+
+router.post('/orderdelete', (req, res) => {
+    const cartId = req.body.cartId;
+    const buyNow = req.body.buyNow;
+    // console.log(typeof userId);
+    // console.log(userId);
+    const url = `UPDATE cartlist SET buyNow=0 WHERE cartId=${cartId}`;
+    db.query(url).then(([results]) => {
+      res.json({ data: results, results: 'success' });
+    });
+});
+
+router.post('/buy', (req, res) => {
+    const orderId = req.body.orderId;
+    const goodsId = req.body.goodsId;
+    // console.log(typeof userId);
+    // console.log(userId);
+    const url = `SELECT cartlist.orderId, cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.orderId=${orderId} and cartlist.buyNow=1 `;
+    db.query(url).then(([results]) => {
+      res.json({ data: results, results: 'success' });
+    });
+});
+
+
+
+//訂單
+//post 購買頁面表單資料 到orderlist
 router.post('/order', (req, res) => {
     const memberId = req.body.memberId;
     const orderId = req.body.orderId;
@@ -201,7 +244,7 @@ router.post('/orderlist', (req, res)=>{
     const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.createAt, cartlist.cartId, cartlist.name, cartlist.quantity
     FROM orderlist
     JOIN cartlist ON orderlist.orderId=cartlist.orderId
-    WHERE orderlist.memberId=${memberId};`;
+    WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1;`;
 
     db.query(url).then(([results]) => {
         console.log(results[0].orderId)
