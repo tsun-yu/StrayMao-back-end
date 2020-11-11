@@ -17,8 +17,7 @@ router.get('/try-db', (req, res)=>{
     })
 });
 
-
-//有分類和主題的文章(all)
+//有分類和主題的文章(Forum_all)
 router.get('/get_forum_list/', (req, res) => {
   db.query(
     `SELECT a.* , b.des as petType ,c.des as issueType
@@ -30,6 +29,18 @@ router.get('/get_forum_list/', (req, res) => {
     res.json(results);
   });
 });
+router.get('/get_forum_list/:articleId', (req, res) => {
+  console.log(req.params);
+  db.query(
+    `SELECT a.* , b.des as petType ,c.des as issueType
+     FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
+     join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
+     WHERE a.talkId = ${req.params.articleId}`
+  ).then(([results]) => {
+    res.json(results);
+  });
+});
+
 
 //論壇
 // ---------------------------分類查詢---------------------------
@@ -128,6 +139,17 @@ router.get('/get_article_list/', (req, res) => {
      WHERE 1`
   ).then(([results]) => {
     
+    res.json(results);
+  });
+});
+
+router.get('/get_article_list/:articleId', (req, res) => {
+  console.log(req.params);
+  db.query(
+    `SELECT a.* , b.des as issueType
+    FROM articlelist a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
+       WHERE a.articleId = ${req.params.articleId}`
+  ).then(([results]) => {
     res.json(results);
   });
 });
