@@ -21,11 +21,11 @@ router.get('/test_list/', (req, res) => {
   for (let i = 0; i < 100; i++) {
     arr.push({ id: i, text: `hello ${i}` });
   }
+  console.log('test_list');
   let data = { data: arr, results: 'success' };
   // res.json(data);
   res.json({ data: data, results: 'success' });
 });
-
 router.get('/get_pet_list/m/:memberId?', (req, res) => {
   db.query(
     `SELECT a.* , c.des as tag 
@@ -41,9 +41,9 @@ router.get('/get_pet_list/m/:memberId?', (req, res) => {
         return db.query(
           `SELECT a.* , c.des as tag,d.memberId as heart 
           FROM petInfo a join petDetail b on a.petId = b.petId 
-                         join tagList c on b.tagId = c.tagId and c.typeId = 1
+                         join tagList c on (b.tagId = c.linkTypeId and c.typeId = 10) or (b.tagId = c.linkTypeId and c.typeId = 9)
                         left  JOIN heartList d on d.itemId = a.petId and d.type = 3 and d.memberId = ${userId}
-          WHERE 1 order by a.petId`
+          WHERE 1 order by a.petId,c.linkTypeId desc`
         );
       }
       //還要做資料整理 把同id的動物的tag變成array
@@ -97,7 +97,6 @@ router.get('/get_pet_list/m/:memberId?', (req, res) => {
       }
     });
 });
-
 router.get('/get_pet_list/:petId', (req, res) => {
   console.log(req.params);
   db.query(
@@ -129,7 +128,6 @@ router.get('/get_pet_list/:petId', (req, res) => {
     res.json({ data: petArray, results: 'success' });
   });
 });
-
 router.get('/get_place/', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE 1`
@@ -137,7 +135,6 @@ router.get('/get_place/', (req, res) => {
     res.json({ data: results, results: 'success' });
   });
 });
-
 router.get('/get_place/:placeId', (req, res) => {
   db.query(
     `SELECT mapId, pinName, address, category, businessHours, phone, longitude, latitude, createAt FROM map WHERE mapId = ${req.params.placeId}`
@@ -177,6 +174,26 @@ router.post('/pet_heart_init', (req, res) => {
                   and type = 3`;
   db.query(url).then(([results]) => {
     res.json({ data: results, results: 'success' });
+  });
+});
+
+router.get('/get_map', (req, res) => {
+  const url = `SELECT * FROM map order by category`;
+  db.query(url).then(([results]) => {
+    // console.log('get: ', results[0].mapId);
+    let retArr = [];
+    let cate = 0;
+    for (let i = 0, j = -1; i < results.length; i++) {
+      if (results[i].category == cate) {
+        retArr[j].info.push(results[i]);
+      } else {
+        retArr.push({ category: results[i].category, info: [results[i]] });
+        cate = results[i].category;
+        j++;
+      }
+    }
+    console.log('aaa: ', retArr);
+    res.json({ data: retArr, results: 'success' });
   });
 });
 
