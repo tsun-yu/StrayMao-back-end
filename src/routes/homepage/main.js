@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 
-const db = require(__dirname + '/../../db_connect2');
+const db = require(__dirname + "/../../db_connect2");
 const router = express.Router();
 
-router.get('/', (req, res)=>{
-    res.send('routes_homepage')
+router.get("/", (req, res) => {
+  res.send("routes_homepage");
 });
 
 //exapmle for get data from database
@@ -15,22 +15,23 @@ router.get('/', (req, res)=>{
 //     })
 // });
 
-router.post('/question',(req,res)=>{
-    let insertValue=''
-    let total = req.body.question.length
-    for(i=0;i<total;i++){
-        i !== (total-1) ? insertValue += `(-1,${req.body.question[i]}),` : insertValue += `(-1,${req.body.question[i]})`
-    }
-    db.query(`INSERT INTO userPreference(memberId, tagId) VALUES`+insertValue)
-    res.json(req.body)
-})
+router.post("/question", (req, res) => {
+  let taglist = [];
+  let insertValue = "";
 
+  for (i = 0; i < req.body.arr.length; i++) {
+    req.body.arr[i] == 1 && taglist.push(i + 1);
+  }
+  let total = taglist.length;
+  console.log(taglist.length);
 
+  for (i = 0; i < total; i++) {
+    i !== total - 1
+      ? (insertValue += `(-1,${taglist[i]}),`)
+      : (insertValue += `(-1,${taglist[i]})`);
+  }
+  db.query(`INSERT INTO userPreference(memberId, tagId) VALUES` + insertValue);
+  res.json(req.body);
+});
 
 module.exports = router;
-
-
-
-
-
-
