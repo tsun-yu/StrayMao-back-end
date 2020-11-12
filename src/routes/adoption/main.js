@@ -26,11 +26,59 @@ router.get('/test_list/', (req, res) => {
   // res.json(data);
   res.json({ data: data, results: 'success' });
 });
+
+router.get('/get_recom', (req, res) => {
+  console.log('1111');
+  db.query(
+    `SELECT c.*,w.des as tag,x.count  from 
+    (
+        SELECT b.petId ,COUNT(b.petId) as count
+        from userPreference a join  petDetail b  on a.tagId = b.tagId
+        where a.memberId = -1
+        and b.petId in (
+            select petId 
+            from petDetail f
+            where f.tagId in (SELECT  tagId from userPreference g where g.memberId = -1 and g.tagId<3)
+        )
+        GROUP by b.petId
+    ) as x join petInfo c on x.petId = c.petId
+         JOIN petDetail v on c.petId = v.petId
+             JOIN taglist w on v.tagId = w.linkTypeId and (w.typeId=9 or w.typeId=10)
+    
+    order by x.count desc ,c.petId,w.linkTypeId desc `
+  ).then(([results]) => {
+    console.log('2222');
+    console.log(results);
+    //還要做資料整理 把同id的動物的tag變成array
+    petInfoTable = results;
+    let petIndex = petInfoTable[0];
+    let petDataRow = petIndex;
+    petDataRow.tag = [petDataRow.tag];
+    let petArray = [petDataRow];
+    for (let i = 1, j = 0; i < petInfoTable.length; i++) {
+      if (petInfoTable[i].petId == petInfoTable[i - 1].petId) {
+        petArray[j].tag.push(petInfoTable[i].tag);
+      } else {
+        j++;
+        obj = petInfoTable[i];
+        obj.heart = false;
+        obj.tag = [obj.tag];
+        petArray[j] = obj;
+      }
+    }
+
+    console.log('pet: ', petArray);
+    console.log('aaaaaaaa');
+    //petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
+    res.json({ data: petArray, results: 'success' });
+  });
+});
+
 router.get('/get_pet_list/m/:memberId?', (req, res) => {
   db.query(
     `SELECT a.* , c.des as tag 
      FROM petInfo a join petDetail b on a.petId = b.petId 
-                    join tagList c on b.tagId = c.tagId and c.typeId = 1
+                    join tagList c on  (b.tagId = c.linkTypeId and c.typeId = 10) or (b.tagId = c.linkTypeId and c.typeId = 9)
      WHERE 1`
   )
     .then(([results]) => {
