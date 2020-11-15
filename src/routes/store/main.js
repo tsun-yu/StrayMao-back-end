@@ -120,6 +120,18 @@ router.get('/goods/evaluation', (req, res)=>{
     })
 });
 
+// 商品Id
+router.get('/goods/:goodsId', (req, res) => {
+    console.log(req.params);
+    db.query(
+      `SELECT a.* , c.des as tag
+         FROM shopgoods a join tagList c on a.categoryId = c.typeId
+         WHERE a.goodsId = ${req.params.goodsId}`
+     ).then(([results])=>{
+        res.json({ data: results, results: 'success' });
+    })
+});
+
 
 // router.post('/add', upload.none(), async (req, res)=>{
 //     const data = {...req.body};
