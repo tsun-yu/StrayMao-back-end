@@ -44,7 +44,7 @@ router.get('/goods/discount', (req, res)=>{
 //get狗商品
 router.get('/goods/dog', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=1 OR categoryId=2')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=5 OR categoryId=6')
     // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
         res.json({ data: results, results: 'success' });
@@ -54,7 +54,7 @@ router.get('/goods/dog', (req, res)=>{
 //get貓商品
 router.get('/goods/cat', (req, res)=>{
     // db.query('SELECT * FROM shopgoods LIMIT 2')
-    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=3 OR categoryId=4')
+    db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE categoryId=7 OR categoryId=8')
     // db.query('SELECT goodsId, goodsImgs, name, categoryId, pricing, price, sale, createAt, shelfStatus, createAt FROM shopgoods WHERE 1 ORDER BY `shopgoods`.`goodsId` ASC')
     .then(([results])=>{
         res.json({ data: results, results: 'success' });
