@@ -69,11 +69,11 @@ router.post('/cartinsert', (req, res) => {
     const goodsId = req.body.goodsId;
     const name = req.body.name;
     const price = req.body.price;
-    const quantity = req.body.quantity;
+    const goodsImgs = req.body.goodsImgs;
     // console.log(typeof userId);
-    // console.log(userId);
-    const url = `INSERT INTO cartlist(memberId, goodsId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState) 
-     VALUES (${memberId},${goodsId},${name},${price},${1},NOW(),0,0,0,0) `;
+    console.log("req.body:",req.body);
+    const url = `INSERT INTO cartlist (memberId, goodsId, name, goodsImgs, price, quantity, createAt, orderId, isBuy, buyNow, orderState) 
+     VALUES (${memberId},${goodsId},'${name}','${goodsImgs}',${price},1,NOW(),0,0,0,'') `;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
@@ -82,36 +82,48 @@ router.post('/cartinsert', (req, res) => {
 //購物車列表
 router.get('/cartlist', (req, res) => {
     const memberId = 100;//req.body.memberId;
-    const goodsId = req.body.goodsId;
+
     // console.log(typeof userId);
     // console.log(userId);
     
-    const url = `SELECT cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.memberId=${memberId} and cartlist.isBuy=0 `;
+    const url = `SELECT cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.memberId=${memberId} and cartlist.isBuy=0 `;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
 });
-
+let orderIdOnCardUpdate=0
+let result2=0
 //按下購買 改變數量 buyNow 新增一筆訂單
 router.post('/cartupdate', (req, res) => {
     // console.log('req.body',req.body);
      const url = `INSERT INTO orderlist (memberId, totalPrice, memberName, address, mobile, orderState, productDelivery, paymentTerm ) 
-     VALUES (${req.body.value[0].memberId}, ${0}, '${req.body.value[0].memberName}', '${req.body.value[0].address}', '${req.body.value[0].mobile}', 0, 0, 0) `;
+     VALUES (${req.body.value[0].memberId}, ${0}, '${req.body.value[0].memberName}', '${req.body.value[0].address}', '${req.body.value[0].mobile}', '未出貨', '', '') `;
     db.query(url).then(([results]) => { 
         const url = `select orderId from orderlist order by createAt desc`;
        return db.query(url)
     }).then(([results]) => { 
         let id = "("+req.body.cartId.join(",")+")"
         const url = `update cartlist set orderId = ${results[0].orderId} where cartId in ${id}`;
+        orderIdOnCardUpdate = results[0].orderId
        return db.query(url)
     }).then(([results]) => {
-        for (let i = 0; i < req.body.value.length; i++ ){
-            const url = `UPDATE cartlist SET buyNow=${1}, quantity=${req.body.value[i].quantity} WHERE cartId=${req.body.value[i].cartId}`;
-            db.query(url)
-        }
-       });
+      // result2 = results
+      for (let i = 0; i < req.body.value.length; i++ ){
+        const url = `UPDATE cartlist SET buyNow=${1}, quantity=${req.body.value[i].quantity} WHERE cartId=${req.body.value[i].cartId}`;
+        db.query(url)
+      }
+      return [results]
+    }).then(([results]) => { 
+      const url = `SELECT cartlist.orderId, cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.orderId=${orderIdOnCardUpdate} and cartlist.buyNow=1 `
+      console.log("SQL :", url) 
+      return db.query(url)
+      // res.json({ data: result2, results: 'success' });
 
-    res.json({data:'good job'});
+      }).then(([results]) => {
+        res.json({ data: results, results: 'success' });
+      });
+      
+    // res.json({data:'good job'});
 });
 
 //刪除購物車商品
@@ -256,7 +268,7 @@ router.post('/buy', (req, res) => {
     const goodsId = req.body.goodsId;
     // console.log(typeof userId);
     // console.log(userId);
-    const url = `SELECT cartlist.orderId, cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.orderId=${orderId} and cartlist.buyNow=1 `;
+    const url = `SELECT cartlist.orderId, cartlist.cartId, cartlist.goodsId, cartlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.price, cartlist.quantity, cartlist.createAt, cartlist.orderId, cartlist.isBuy, cartlist.buyNow, cartlist.orderState, memberlist.memberName, memberlist.mobile, memberlist.address FROM cartlist LEFT JOIN memberlist ON cartlist.memberId=memberlist.memberId WHERE cartlist.orderId=${orderId} and cartlist.buyNow=1 `;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
@@ -270,7 +282,7 @@ router.post('/order', (req, res) => {
     const orderId = req.body.orderId;
     // console.log(typeof userId);
     // console.log(userId);
-    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist LEFT JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
+    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist LEFT JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
@@ -280,7 +292,7 @@ router.post('/order', (req, res) => {
 router.post('/orderlist', (req, res)=>{
     const memberId = req.body.memberId;
     const orderId = req.body.orderId;
-    const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.createAt, cartlist.cartId, cartlist.name, cartlist.quantity
+    const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.createAt, cartlist.cartId, cartlist.name, cartlist.goodsImgs, cartlist.quantity
     FROM orderlist
     JOIN cartlist ON orderlist.orderId=cartlist.orderId
     WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1;`;
