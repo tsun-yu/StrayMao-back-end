@@ -94,7 +94,7 @@ router.post("/getMyCommemtList", async (req, res) => {
   };
 
   const sql =
-    "select distinct a.cartId , a.orderId , a.goodsId , c.name , d.memberId , d.memberName "
+    "select distinct a.cartId , a.orderId , a.goodsId , a.goodsImgs , c.name , d.memberId , d.memberName "
     + ",IFNULL((select e.comStars from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comStars "
     + ",IFNULL((select e.comDesc from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDesc "
     + ",IFNULL((select e.addDate from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDate "
@@ -414,37 +414,48 @@ router.get("/addget", (req, res) => {
 // });
 
 //會員註冊
-router.post("/add", upload.none(), async (req, res) => {
-  const data = { ...req.body };
-  data.createAt = new Date();
-  let obj = req.body;
-  let memberName = obj.memberName;
-  let memberPic = obj.memberPic;
-  let password = obj.password;
-  let birthday = obj.birthday;
-  let telephone = obj.telephone;
-  let mobile = obj.mobile;
-  let email = obj.email;
-  let address = obj.address;
-  const sql =
-    "INSERT INTO `memberlist` (`memberName`, `memberPic`, `password`, `birthday`, `telephone`, `mobile`, `email`, `address`, `createAt`) VALUES (?,?,?,?,?,?,?,?,NOW())";
-  await db.query(sql, [
-    memberName,
-    memberPic,
-    password,
-    birthday,
-    telephone,
-    mobile,
-    email,
-    address,
-  ]);
-  // [{"fieldCount":0,"affectedRows":1,"insertId":860,"info":"","serverStatus":2,"warningStatus":1},null]
+router.post("/addMember", upload.none(), async (req, res) => {
+  const rsObj = {
+    success : false,
+    msg: ''
+  }
 
-  res.json({
-    success: !!affectedRows,
-    affectedRows,
-    insertId,
-  });
+  let obj = req.body;
+  // let memberName = obj.memberName;
+  // let memberPic = obj.memberPic;
+  // let password = obj.password;
+  // let birthday = obj.birthday;
+  // let telephone = obj.telephone;
+  // let mobile = obj.mobile;
+  // let email = obj.email;
+  // let address = obj.address;
+  const sql =
+    "INSERT INTO `memberlist` "
+    + "(`memberName`, `memberPic`, `password`, `birthday`, `telephone`, `mobile`, `email`, `address`, `createAt`) "
+    + "VALUES "
+    + "(?,?,?,?,?,?,?,?, NOW() ) ";
+  
+  try{
+    const [{ affectedRows, changedRows }] = await db.query(sql, [
+      obj.memberName,
+      obj.memberPic,
+      obj.password,
+      obj.birthday,
+      obj.telephone,
+      obj.mobile,
+      obj.email,
+      obj.address,
+    ]);
+
+    if(affectedRows > 0){
+      rsObj.success = true,
+      rsObj.msg = "新增了" + affectedRows + "筆資料";
+    }
+  }catch(error){
+    rsObj.msg = error
+  }
+
+  res.json(rsObj);
 });
 
 router.get("/edit/:memberId", async (req, res) => {
