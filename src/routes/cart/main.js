@@ -198,7 +198,7 @@ router.post('/order', (req, res) => {
     const orderId = req.body.orderId;
     // console.log(typeof userId);
     console.log("orderId:",orderId);
-    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist LEFT JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
+    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
@@ -208,7 +208,7 @@ router.post('/order', (req, res) => {
 router.post('/orderlist', (req, res)=>{
     const memberId = req.body.memberId;
     const orderId = req.body.orderId;
-    const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.createAt, cartlist.cartId, cartlist.name, cartlist.goodsImgs, cartlist.quantity
+    const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.memberName, orderlist.createAt, orderlist.totalPrice, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm, cartlist.cartId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, cartlist.price
     FROM orderlist
     JOIN cartlist ON orderlist.orderId=cartlist.orderId
     WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1;`;
