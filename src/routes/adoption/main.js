@@ -21,14 +21,13 @@ router.get('/test_list/', (req, res) => {
   for (let i = 0; i < 100; i++) {
     arr.push({ id: i, text: `hello ${i}` });
   }
-  console.log('test_list');
+
   let data = { data: arr, results: 'success' };
   // res.json(data);
   res.json({ data: data, results: 'success' });
 });
 
 router.get('/get_recom', (req, res) => {
-  console.log('1111');
   db.query(
     `SELECT c.*,w.des as tag,x.count  from 
     (
@@ -47,8 +46,6 @@ router.get('/get_recom', (req, res) => {
     
     order by x.count desc ,c.petId,w.linkTypeId desc `
   ).then(([results]) => {
-    console.log('2222');
-    console.log(results);
     //還要做資料整理 把同id的動物的tag變成array
     petInfoTable = results;
     let petIndex = petInfoTable[0];
@@ -67,8 +64,6 @@ router.get('/get_recom', (req, res) => {
       }
     }
 
-    console.log('pet: ', petArray);
-    console.log('aaaaaaaa');
     //petData : {petId:petId,info:{name,gender,dogcat,area,address,des,Q1~Q13,tag:[tagID]}}
     res.json({ data: petArray, results: 'success' });
   });
@@ -82,7 +77,6 @@ router.get('/get_pet_list/m/:memberId?', (req, res) => {
      WHERE 1`
   )
     .then(([results]) => {
-      // console.log(results);
       let userId = 0;
       if (req.params.memberId !== undefined) {
         userId = req.params.memberId;
@@ -115,9 +109,6 @@ router.get('/get_pet_list/m/:memberId?', (req, res) => {
       return { data: petArray, results: 'success' };
     })
     .then((data) => {
-      // console.log('data:', [...data][0]);
-      // console.log('data:', data.results);
-
       if (data.results === undefined) {
         // //還要做資料整理 把同id的動物的tag變成array
         let results = [...data][0];
@@ -146,7 +137,6 @@ router.get('/get_pet_list/m/:memberId?', (req, res) => {
     });
 });
 router.get('/get_pet_list/:petId', (req, res) => {
-  console.log(req.params);
   db.query(
     `SELECT a.* , c.des as tag 
        FROM petInfo a join petDetail b on a.petId = b.petId 
@@ -193,8 +183,7 @@ router.get('/get_place/:placeId', (req, res) => {
 router.post('/pet_heart', (req, res) => {
   const userId = req.body.userId;
   const petId = req.body.petId;
-  // console.log(typeof userId);
-  // console.log(userId);
+
   const url = `INSERT INTO heartList( type, memberId, itemId) 
                VALUES (3,${userId},${petId}) `;
   db.query(url).then(([results]) => {
@@ -213,6 +202,18 @@ router.delete('/pet_heart', (req, res) => {
     res.json({ data: results, results: 'success' });
   });
 });
+
+router.post('/get_adop_pet', (req, res) => {
+  const userId = req.body.userId;
+  const petId = req.body.petId;
+
+  const url = `insert into adopList(memberId,petId) values(${userId} ,${petId} )`;
+  console.log(url);
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
+
 router.post('/pet_heart_init', (req, res) => {
   const userId = req.body.userId;
   const petId = req.body.petId;
@@ -228,7 +229,6 @@ router.post('/pet_heart_init', (req, res) => {
 router.get('/get_map', (req, res) => {
   const url = `SELECT * FROM map order by category`;
   db.query(url).then(([results]) => {
-    // console.log('get: ', results[0].mapId);
     let retArr = [];
     let cate = 0;
     for (let i = 0, j = -1; i < results.length; i++) {
@@ -240,9 +240,15 @@ router.get('/get_map', (req, res) => {
         j++;
       }
     }
-    console.log('aaa: ', retArr);
+
     res.json({ data: retArr, results: 'success' });
   });
 });
-
+router.get('/adop_list/:memberId', (req, res) => {
+  let memberId = req.params.memberId;
+  const url = `SELECT a.petId,b.pic FROM adopList a join petInfo b on a.petId = b.petId join memberlist c on a.memberId = c.memberId  WHERE a.memberId = ${memberId}`;
+  db.query(url).then(([results]) => {
+    res.json({ data: results, results: 'success' });
+  });
+});
 module.exports = router;
