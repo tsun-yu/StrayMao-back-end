@@ -115,29 +115,36 @@ router.post("/getMyCommemtList", async (req, res) => {
 });
 
 router.post("/addMyCommemtList", upload.none(), async (req, res) => {
-  const data = { ...req.body };
-  data.addDate = new Date();
   let obj = req.body;
-  
+  const rsObj = {
+    success : false,
+    msg: ''
+  }
   const sql =
     "insert into commentlist "
     + "(orderId, goodsId, comStars, comDesc, addDate, addMemberId, modDate, modMemberId) "
     + "values "
     + "(?, ?, ?, ?, current_timestamp(), ?, current_timestamp(), ?);";
-  const [{ affectedRows, changedRows }] = await db.query(sql, [
-    obj.orderId,
-    obj.goodsId,
-    obj.comStars,
-    obj.comDesc,
-    obj.memberId,
-    obj.memberId,
-  ]);
 
-  res.json({
-    success: !changedRows,
-    affectedRows,
-    changedRows,
-  });
+  try{
+    const [{ affectedRows, changedRows }] = await db.query(sql, [
+      obj.orderId,
+      obj.goodsId,
+      obj.comStars,
+      obj.comDesc,
+      obj.memberId,
+      obj.memberId,
+    ]);
+
+    if(affectedRows > 0){
+      rsObj.success = true;
+      rsObj.msg = "影響" + changedRows + "條資料";
+    }
+  }catch(error){
+    rs.msg = error;  
+  }
+  
+  res.json(rsObj);
 });
 
 router.post("/updMyCommemtList", upload.none(), async (req, res) => {
@@ -413,13 +420,13 @@ router.get("/addget", (req, res) => {
 //     res.json(req.body);
 // });
 
+//會員註冊 Start
 //會員註冊
 router.post("/addMember", upload.none(), async (req, res) => {
   const rsObj = {
     success : false,
     msg: ''
   }
-
   let obj = req.body;
   // let memberName = obj.memberName;
   // let memberPic = obj.memberPic;
@@ -454,9 +461,55 @@ router.post("/addMember", upload.none(), async (req, res) => {
   }catch(error){
     rsObj.msg = error
   }
-
   res.json(rsObj);
 });
+
+//查詢會員資料 (then catch 寫法)
+router.get("/member/get/:memberId", async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
+  const sql = "SELECT * FROM memberlist WHERE memberId = ? limit 1";
+  
+  db.query(sql, [req.params.memberId])
+    .then(([result]) => {
+      output.success = true;
+      result[0].birthday = moment(result[0].birthday).format("YYYY-MM-DD");
+      output.data = result;
+      res.json(output)
+    })
+    .catch((error) => {
+      output.msg = error;
+      res.json(output);
+    });
+
+});
+
+//修改會員資料
+router.post("/member/edit", async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
+  const q = req.body;
+  const sql = "update memberlist set memberName = ? , birthday = ? , telephone = ? , mobile = ? , address = ? "
+            + "where memberId = ? ";
+  
+  db.query(sql, [
+    q.memberName,
+    q.birthday,
+    q.telephone,
+    q.mobile,
+    q.address,
+    q.memberId
+    ])
+    .then(([result]) => {
+      output.success = true;
+      output.data = result;
+      res.json(output)
+    })
+    .catch((error) => {
+      output.msg = error;
+      res.json(output);
+    });
+});
+//會員註冊 End
+
 
 router.get("/edit/:memberId", async (req, res) => {
   const sql = "SELECT * FROM memberlist WHERE memberId=?";
