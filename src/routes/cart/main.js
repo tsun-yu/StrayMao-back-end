@@ -221,25 +221,25 @@ router.delete('/cartlists', (req, res) => {
 
 //按下購買 更新訂單資料(cartlist&orderlist) 數量 收件人 地址 電話 buyNow=2 isBuy=1
 router.post('/orderupdate', (req, res) => {
-    // const orderId = req.body.orderId[0];
-    // const quantity = req.body.quantity[0];
-    // const memberName = req.body.memberName[0];
-    // const address = req.body.address[0];
-    // const mobile = req.body.mobile[0];
-    // const productDelivery = req.body.productDelivery;
-    // const paymentTerm = req.body.paymentTerm;
-    // const totalPrice = req.body.price[0];
-    // console.log('req.body:',req.body);
-    // console.log('req.body.orderId[0]:',req.body.orderId[0]);
-    // const url = `UPDATE orderlist SET memberName='${memberName}', address='${address}', mobile='${mobile}', productDelivery='${productDelivery}', paymentTerm='${paymentTerm}', totalPrice=${totalPrice} createAt=NOW() WHERE orderId=${orderId}`;
-    // db.query(url).then(([results]) => {
+    const orderId = req.body.orderId;
+    const quantity = req.body.quantity;
+    const memberName = req.body.memberName;
+    const address = req.body.address;
+    const mobile = req.body.mobile;
+    const productDelivery = req.body.productDelivery;
+    const paymentTerm = req.body.paymentTerm;
+    const totalPrice = req.body.totalPrice;
+    console.log('req.body:',req.body);
+    console.log('req.body.orderId:',req.body.orderId);
+    const url = `UPDATE orderlist SET memberName='${memberName}', address='${address}', mobile='${mobile}', productDelivery='${productDelivery}', paymentTerm='${paymentTerm}', totalPrice=${totalPrice}, createAt=NOW() WHERE orderId=${orderId}`;
+    db.query(url).then(([results]) => {
     
-    //     const url = `UPDATE cartlist SET quantity=${quantity}, buyNow=${2}, isBuy=${1} WHERE orderId=${orderId}`;
+        const url = `UPDATE cartlist SET quantity=${quantity}, buyNow=${2}, isBuy=${1} WHERE orderId=${orderId}`;
   
-    //       db.query(url).then(([results]) => {
-    //           res.json({ data: results, results: 'success' });
-    //       });
-    // });
+          db.query(url).then(([results]) => {
+              res.json({ data: results, results: 'success' });
+          });
+    });
 });
 
 // router.post('/buyupdate', (req, res) => {
