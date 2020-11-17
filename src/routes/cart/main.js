@@ -148,77 +148,6 @@ router.delete('/cartlists', (req, res) => {
     });
 });
 
-// router.get('/cartlist/:memberId', (req, res)=>{
-//     console.log(req.params);
-//     // db.query('SELECT * FROM cartlist LIMIT 2')
-//     db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE memberId = ${req.params.memberId}')
-//     // db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` ASC')
-//     .then(([results])=>{
-//         cartInfoTable = results;
-//         let cartIndex = cartInfoTable[0];
-//         let cartDataRow = cartIndex;
-//         if (cartDataRow == null) {
-//             console.log('null');
-//             res.json({ data: [], result: 'Not found' });
-//         }
-//         cartDataRow.tag = [cartDataRow.tag];
-//         let cartArray = [cartDataRow];
-//         for (let i = 1, j = 0; i < cartInfoTable.length; i++) {
-//             if (cartInfoTable[i].memberId == cartInfoTable[i - 1].memberId) {
-//                 cartArray[j].tag.push(cartInfoTable[i].tag);
-//             } else {
-//               j++;
-//               obj = cartInfoTable[i];
-//               obj.tag = [obj.tag] || null;
-//               cartArray[j] = obj;
-//             }
-//           }
-//         res.json({ data: cartArray, results: 'success' });
-//     })
-// });
-
-// router.get('/cartlist', (req, res)=>{
-//     // db.query('SELECT * FROM cartlist LIMIT 2')
-//     db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` DESC')
-//     // db.query('SELECT cartId, goodsId, memberId, name, price, quantity, createAt, orderId, isBuy, buyNow, orderState FROM cartlist WHERE 1 ORDER BY `cartlist`.`cartId` ASC')
-//     .then(([results])=>{
-//         res.json(results);
-//     })
-// });
-
-
-
-//購買
-//(update 購物車資料到cartlist)
-// router.post('/orderinsert', (req, res) => {
-//     console.log('req.body',req.body)
-    
-//     const memberId = req.body.memberId;
-//     const totalPrice = req.body.totalPrice;
-//     const memberName = req.body.memberName;
-//     const address = req.body.address;
-//     const mobile = req.body.mobile;
-//     console.log('req.memberName',memberName)
-//     // res.json({ data: "123", results: 'success' })
-//     // // const productDelivery = req.body.productDelivery;
-//     // // const paymentTerm = req.body.paymentTerm;
-//     // // console.log(typeof userId);
-//     // // console.log(userId);
-//     const url = `INSERT INTO orderlist (memberId, totalPrice, memberName, address, mobile, orderState, productDelivery, paymentTerm ) 
-//      VALUES (${memberId}, ${totalPrice}, '${memberName}', ${address}, '${mobile}', 0, 0, 0) `;//要update cartlist的orderId & buyNow=1
-
-//      console.log('url',url)
-//     // res.json({ data: "123", results: 'success' })
-
-//     db.query(url).then(([results]) => {
-//       const url = `UPDATE cartlist SET orderId=${results.insertId}, buyNow=${1} WHERE cartId=99`;
-
-//         db.query(url).then(([results]) => {
-//             res.json({ data: results, results: 'success' });
-//         });
-//     });
-// });
-
 //按下購買 更新訂單資料(cartlist&orderlist) 數量 收件人 地址 電話 buyNow=2 isBuy=1
 router.post('/orderupdate', (req, res) => {
     const orderId = req.body.orderId;
@@ -229,28 +158,16 @@ router.post('/orderupdate', (req, res) => {
     const productDelivery = req.body.productDelivery;
     const paymentTerm = req.body.paymentTerm;
     const totalPrice = req.body.totalPrice;
-    console.log('req.body:',req.body);
-    console.log('req.body.orderId:',req.body.orderId);
+    // console.log('req.body:',req.body);
+    // console.log('req.body.orderId:',req.body.orderId);
     const url = `UPDATE orderlist SET memberName='${memberName}', address='${address}', mobile='${mobile}', productDelivery='${productDelivery}', paymentTerm='${paymentTerm}', totalPrice=${totalPrice}, createAt=NOW() WHERE orderId=${orderId}`;
     db.query(url).then(([results]) => {
-    
-        const url = `UPDATE cartlist SET quantity=${quantity}, buyNow=${2}, isBuy=${1} WHERE orderId=${orderId}`;
-  
-          db.query(url).then(([results]) => {
-              res.json({ data: results, results: 'success' });
-          });
-    });
+      const url = `UPDATE cartlist SET quantity=${quantity}, buyNow=2, isBuy=1 WHERE orderId=${orderId}`;
+      return db.query(url)
+    }).then(([results]) => {
+        res.json({ data: results, results: 'success' });
+    }); 
 });
-
-// router.post('/buyupdate', (req, res) => {
-//     const orderId = req.body.orderId;
-//     // console.log(typeof userId);
-//     // console.log(userId);
-//     const url = `UPDATE cartlist SET buyNow=2, isBuy=1 WHERE order=${orderId}`;
-//     db.query(url).then(([results]) => {
-//       res.json({ data: results, results: 'success' });
-//     });
-// });
 
 //刪除購買頁面的商品 buyNow=0
 router.post('/orderdelete', (req, res) => {
@@ -278,10 +195,9 @@ router.post('/buy', (req, res) => {
 
 //(某一筆)訂單
 router.post('/order', (req, res) => {
-    const memberId = req.body.memberId;
     const orderId = req.body.orderId;
     // console.log(typeof userId);
-    // console.log(userId);
+    console.log("orderId:",orderId);
     const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist LEFT JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
@@ -352,13 +268,3 @@ router.post('/orderlist', (req, res)=>{
 
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
