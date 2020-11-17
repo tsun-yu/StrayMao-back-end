@@ -124,9 +124,10 @@ router.get('/goods/evaluation', (req, res)=>{
 router.get('/goods/:goodsId', (req, res) => {
     console.log(req.params);
     db.query(
-      `SELECT a.* , c.des as tag
-         FROM shopgoods a join tagList c on a.categoryId = c.typeId
-         WHERE a.goodsId = ${req.params.goodsId}`
+      `SELECT a.* ,c.des tag,
+      replace(a.goodsDescription , '\n' , '<br>') newDesc
+      FROM shopgoods a join tagList c on a.categoryId = c.typeId
+      WHERE a.goodsId = ${req.params.goodsId}`
      ).then(([results])=>{
         res.json({ data: results, results: 'success' });
     })
