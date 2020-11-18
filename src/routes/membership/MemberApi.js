@@ -41,7 +41,7 @@ router.post("/getHeartList", async (req, res) => {
       + "where p.petId in (select itemId from heartlist a where a.`type` = 3 and a.memberId = ? order by createAt desc) ";
       break;
   }
-  const [rs] = await db.query(sql, [ 
+  const [rs] = await db.query(sql, [
     req.body.memberId
   ]);
   console.log("RS:", rs);
@@ -68,9 +68,9 @@ router.post("/getMyCommemtList", async (req, res) => {
 
   const sql =
     "select distinct a.cartId , a.orderId , a.goodsId , a.goodsImgs , c.name , d.memberId , d.memberName "
-    + ",e.comStars "
-    + ",e.comDesc "
-    + ",e.addDate as comDate "
+    + ",IFNULL(e.comStars , 0) as comStars "
+    + ",IFNULL(e.comDesc , '') as comDesc "
+    + ",IFNULL(e.addDate , NOW()) as comDate "
     + "from cartlist a "
     + "join orderlist b on a.orderId = b.orderId "
     + "join shopgoods c on a.goodsId = c.goodsId "
