@@ -198,20 +198,20 @@ router.post('/order', (req, res) => {
     const orderId = req.body.orderId;
     // console.log(typeof userId);
     console.log("orderId:",orderId);
-    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId};`;
+    const url = `SELECT orderlist.orderId, orderlist.memberId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, orderlist.totalPrice, orderlist.createAt, orderlist.memberName, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm FROM orderlist JOIN cartlist ON orderlist.orderId=cartlist.orderId WHERE orderlist.orderId=${orderId} ;`;
     db.query(url).then(([results]) => {
       res.json({ data: results, results: 'success' });
     });
 });
 
 //訂單列表
-router.post('/orderlist', (req, res)=>{
+router.post('/orderlist/asc', (req, res)=>{
     const memberId = req.body.memberId;
     const orderId = req.body.orderId;
     const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.memberName, orderlist.createAt, orderlist.totalPrice, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm, cartlist.cartId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, cartlist.price
     FROM orderlist
     JOIN cartlist ON orderlist.orderId=cartlist.orderId
-    WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1;`;
+    WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1 ORDER BY orderlist.createAt ASC`;//舊到新
 
     db.query(url).then(([results]) => {
         // console.log(results[0].orderId)
@@ -238,7 +238,38 @@ router.post('/orderlist', (req, res)=>{
       });
 });
 
+router.post('/orderlist/desc', (req, res)=>{
+  const memberId = req.body.memberId;
+  const orderId = req.body.orderId;
+  const url = `SELECT orderlist.orderId, orderlist.memberId, orderlist.memberName, orderlist.createAt, orderlist.totalPrice, orderlist.address, orderlist.orderState, orderlist.productDelivery, orderlist.paymentTerm, cartlist.cartId, cartlist.name, cartlist.goodsImgs, cartlist.quantity, cartlist.price
+  FROM orderlist
+  JOIN cartlist ON orderlist.orderId=cartlist.orderId
+  WHERE orderlist.memberId=${memberId} and cartlist.isBuy=1 ORDER BY orderlist.createAt DESC`;//新到舊
 
+  db.query(url).then(([results]) => {
+      // console.log(results[0].orderId)
+      let a=[]
+      let b=[]
+      let oldId=0
+      let bigArr=[]
+
+      for(let i=0,j=-1;i<results.length;i++){
+          if(results[i].orderId==oldId){bigArr[j].data.push({...results[i]})}
+          else{
+              bigArr.push(
+                  {
+                      orderId:results[i].orderId,
+                      // data:[{"cartId":results[i].cartId}]
+                      data:[{...results[i]}]
+                  })
+                  oldId=results[i].orderId
+                  j++
+              }
+      }
+      // console.log(bigArr[2])
+      res.json({ data: bigArr, results: 'success' });
+    });
+});
 
 // cartlist完整內容	
 //cartId
