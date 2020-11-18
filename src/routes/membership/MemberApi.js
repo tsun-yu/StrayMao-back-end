@@ -187,11 +187,6 @@ router.use((req, res, next) => {
   if (whiteList.includes(u[1])) {
     next();
   } else {
-    // if(! req.session.admin){
-    //     res.redirect('/member_list/list');
-    // } else {
-    //     next();
-    // }
     next();
   }
 });
@@ -247,21 +242,6 @@ router.get("/verify2", (req, res) => {
   res.json({
     bearer: req.bearer,
   });
-  // let auth = req.get('Authorization');
-  //
-  // if(auth.indexOf('Bearer ')===0){
-  //     auth = auth.slice(7);
-  // } else {
-  //     return res.json({error: 'bad token!'});
-  // }
-  //
-  // jwt.verify(auth, process.env.TOKEN_SECRET, function(error, payload){
-  //     if(error){
-  //         res.json({error: error});
-  //     } else {
-  //         res.json(payload);
-  //     }
-  // });
 });
 
 async function getListData(req) {
@@ -402,19 +382,11 @@ router.post("/addMember", upload.none(), async (req, res) => {
     msg: ''
   }
   let obj = req.body;
-  // let memberName = obj.memberName;
-  // let memberPic = obj.memberPic;
-  // let password = obj.password;
-  // let birthday = obj.birthday;
-  // let telephone = obj.telephone;
-  // let mobile = obj.mobile;
-  // let email = obj.email;
-  // let address = obj.address;
   const sql =
     "INSERT INTO `memberlist` "
     + "(`memberName`, `memberPic`, `password`, `birthday`, `telephone`, `mobile`, `email`, `address`, `createAt`) "
     + "VALUES "
-    + "(?,?,?,?,?,?,?,?, NOW() ) ";
+    + "(?,?,SHA1(?),?,?,?,?,?, NOW() ) ";
   
   try{
     const [{ affectedRows, changedRows }] = await db.query(sql, [
@@ -462,7 +434,7 @@ router.post("/member/edit", async (req, res) => {
   let output = { success: false , msg: "" , data: [] };
   const q = req.body;
   const sql = "update memberlist set memberName = ? , birthday = ? , telephone = ? , mobile = ? , address = ? "
-            + "where memberId = ? and password=SHA1(?) ";
+            + "where memberId = ? and password = SHA1(?) ";
   db.query(sql, [
     q.memberName,
     q.birthday,
