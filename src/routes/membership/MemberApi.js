@@ -65,17 +65,15 @@ router.post("/getMyCommemtList", async (req, res) => {
   const output = {
     success: false,
   };
-
-  const sql =
+  const sql = 
     "select distinct a.cartId , a.orderId , a.goodsId , a.goodsImgs , c.name , d.memberId , d.memberName "
-    + ",IFNULL(e.comStars , 0) as comStars "
-    + ",IFNULL(e.comDesc , '') as comDesc "
-    + ",IFNULL(e.addDate , NOW()) as comDate "
+    + ",IFNULL((select e.comStars from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), 0) as comStars "
+    + ",IFNULL((select e.comDesc from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDesc "
+    + ",IFNULL((select e.addDate from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDate "
     + "from cartlist a "
     + "join orderlist b on a.orderId = b.orderId "
     + "join shopgoods c on a.goodsId = c.goodsId "
     + "join memberlist d on a.memberId = d.memberId "
-    + "left join (select ee.orderId , ee.goodsId , ee.comStars , ee.comDesc , ee.addDate from commentlist ee , cartlist aa where ee.orderId=aa.orderId and ee.goodsId=aa.goodsId order by ee.addDate desc limit 1) e on e.orderId = a.orderId and e.goodsId = a.goodsId "
     + "where 1 "
     + "and b.orderState = 3 "
     + "and a.memberId = ? ";
@@ -89,6 +87,7 @@ router.post("/getMyCommemtList", async (req, res) => {
 });
 
 router.post("/addMyCommemtList", upload.none(), async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
   let obj = req.body;
   const rsObj = {
     success : false,
@@ -100,25 +99,24 @@ router.post("/addMyCommemtList", upload.none(), async (req, res) => {
     + "values "
     + "(?, ?, ?, ?, current_timestamp(), ?, current_timestamp(), ?);";
 
-  try{
-    const [{ affectedRows, changedRows }] = await db.query(sql, [
-      obj.orderId,
-      obj.goodsId,
-      obj.comStars,
-      obj.comDesc,
-      obj.memberId,
-      obj.memberId,
-    ]);
-
-    if(affectedRows > 0){
-      rsObj.success = true;
-      rsObj.msg = "影響" + changedRows + "條資料";
-    }
-  }catch(error){
-    rs.msg = error;  
-  }
-  
-  res.json(rsObj);
+  db.query(sql, [
+    obj.orderId,
+    obj.goodsId,
+    obj.comStars,
+    obj.comDesc,
+    obj.memberId,
+    obj.memberId,
+  ])
+  .then(([result]) => {
+    output.success = true;
+    output.data = result;
+    output.msg = result.info
+    res.json(output)
+  })
+  .catch((error) => {
+    output.msg = error;
+    res.json(output);
+  });
 });
 
 router.post("/updMyCommemtList", upload.none(), async (req, res) => {
@@ -177,6 +175,90 @@ router.post("/delMyCommemtList", upload.none(), async (req, res) => {
 
   res.json(rsObj);
 });
+
+
+//會員註冊 Start
+//會員註冊
+router.post("/addMember", upload.none(), async (req, res) => {
+  const rsObj = {
+    success : false,
+    msg: ''
+  }
+  let obj = req.body;
+  const sql =
+    "INSERT INTO `memberlist` "
+    + "(`memberName`, `memberPic`, `password`, `birthday`, `telephone`, `mobile`, `email`, `address`, `createAt`) "
+    + "VALUES "
+    + "(?,?,SHA1(?),?,?,?,?,?, NOW() ) ";
+  
+  try{
+    const [{ affectedRows, changedRows }] = await db.query(sql, [
+      obj.memberName,
+      obj.memberPic,
+      obj.password,
+      obj.birthday,
+      obj.telephone,
+      obj.mobile,
+      obj.email,
+      obj.address,
+    ]);
+
+    if(affectedRows > 0){
+      rsObj.success = true,
+      rsObj.msg = "新增了" + affectedRows + "筆資料";
+    }
+  }catch(error){
+    rsObj.msg = error
+  }
+  res.json(rsObj);
+});
+
+//查詢會員資料 (then catch 寫法)
+router.get("/member/get/:memberId", async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
+  const sql = "SELECT * FROM memberlist WHERE memberId = ? limit 1";
+  
+  db.query(sql, [req.params.memberId])
+    .then(([result]) => {
+      output.success = true;
+      result[0].birthday = moment(result[0].birthday).format("YYYY-MM-DD");
+      output.data = result;
+      res.json(output)
+    })
+    .catch((error) => {
+      output.msg = error;
+      res.json(output);
+    });
+
+});
+
+//修改會員資料
+router.post("/member/edit", async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
+  const q = req.body;
+  const sql = "update memberlist set memberName = ? , birthday = ? , telephone = ? , mobile = ? , address = ? "
+            + "where memberId = ? and password = SHA1(?) ";
+  db.query(sql, [
+    q.memberName,
+    q.birthday,
+    q.telephone,
+    q.mobile,
+    q.address,
+    q.memberId,
+    q.password
+    ])
+    .then(([result]) => {
+      output.success = true;
+      output.data = result;
+      res.json(output)
+    })
+    .catch((error) => {
+      output.msg = error;
+      res.json(output);
+    });
+});
+//會員註冊 End
+
 
 router.use((req, res, next) => {
   const whiteList = ["list", "login", "verify", "verify2"];
@@ -373,89 +455,6 @@ router.get("/addget", (req, res) => {
 // router.post('/add', upload.none(), (req, res)=>{
 //     res.json(req.body);
 // });
-
-//會員註冊 Start
-//會員註冊
-router.post("/addMember", upload.none(), async (req, res) => {
-  const rsObj = {
-    success : false,
-    msg: ''
-  }
-  let obj = req.body;
-  const sql =
-    "INSERT INTO `memberlist` "
-    + "(`memberName`, `memberPic`, `password`, `birthday`, `telephone`, `mobile`, `email`, `address`, `createAt`) "
-    + "VALUES "
-    + "(?,?,SHA1(?),?,?,?,?,?, NOW() ) ";
-  
-  try{
-    const [{ affectedRows, changedRows }] = await db.query(sql, [
-      obj.memberName,
-      obj.memberPic,
-      obj.password,
-      obj.birthday,
-      obj.telephone,
-      obj.mobile,
-      obj.email,
-      obj.address,
-    ]);
-
-    if(affectedRows > 0){
-      rsObj.success = true,
-      rsObj.msg = "新增了" + affectedRows + "筆資料";
-    }
-  }catch(error){
-    rsObj.msg = error
-  }
-  res.json(rsObj);
-});
-
-//查詢會員資料 (then catch 寫法)
-router.get("/member/get/:memberId", async (req, res) => {
-  let output = { success: false , msg: "" , data: [] };
-  const sql = "SELECT * FROM memberlist WHERE memberId = ? limit 1";
-  
-  db.query(sql, [req.params.memberId])
-    .then(([result]) => {
-      output.success = true;
-      result[0].birthday = moment(result[0].birthday).format("YYYY-MM-DD");
-      output.data = result;
-      res.json(output)
-    })
-    .catch((error) => {
-      output.msg = error;
-      res.json(output);
-    });
-
-});
-
-//修改會員資料
-router.post("/member/edit", async (req, res) => {
-  let output = { success: false , msg: "" , data: [] };
-  const q = req.body;
-  const sql = "update memberlist set memberName = ? , birthday = ? , telephone = ? , mobile = ? , address = ? "
-            + "where memberId = ? and password = SHA1(?) ";
-  db.query(sql, [
-    q.memberName,
-    q.birthday,
-    q.telephone,
-    q.mobile,
-    q.address,
-    q.memberId,
-    q.password
-    ])
-    .then(([result]) => {
-      output.success = true;
-      output.data = result;
-      res.json(output)
-    })
-    .catch((error) => {
-      output.msg = error;
-      res.json(output);
-    });
-});
-//會員註冊 End
-
 
 router.get("/edit/:memberId", async (req, res) => {
   const sql = "SELECT * FROM memberlist WHERE memberId=?";
