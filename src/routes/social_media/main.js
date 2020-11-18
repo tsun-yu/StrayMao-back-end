@@ -213,11 +213,25 @@ router.get('/forum/news/dog', (req, res)=>{
 
 
 //get論壇熱門
-router.get('/forum/hot', (req, res)=>{
-    db.query('SELECT `talkId`, `typeId`, `issueId`, `memberId`, `talkTitle`, `talkContent`, `talkPic`, `clicks`, `createAt` FROM `forumarticle` WHERE 1 ORDER BY `forumarticle`.`clicks` DESC')
-    .then(([results])=>{
-        res.json(results)
+router.get('/get_forum_hot/', (req, res) => {
+  db.query(
+    `SELECT a.* , b.des as petType ,c.des as issueType
+     FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
+     join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
+     WHERE 1 ORDER BY a.clicks DESC`
+  ).then(([results]) => {
+    results.forEach((e)=>{
+      console.log(e)
+      e.createAt=moment(e.createAt).format("YYYY-MM-DD");
+      console.log("temp:",e.createAt)
+      e.createAt = e.createAt.split('-')
+      console.log("temp1:",e.createAt)
     })
+    res.json(results);
+  }).catch((e)=>{
+    console.log(e)
+    res.send(e);
+  });
 });
 
 
