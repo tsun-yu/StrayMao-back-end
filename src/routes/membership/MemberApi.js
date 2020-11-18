@@ -462,15 +462,15 @@ router.post("/member/edit", async (req, res) => {
   let output = { success: false , msg: "" , data: [] };
   const q = req.body;
   const sql = "update memberlist set memberName = ? , birthday = ? , telephone = ? , mobile = ? , address = ? "
-            + "where memberId = ? ";
-  
+            + "where memberId = ? and password=SHA1(?) ";
   db.query(sql, [
     q.memberName,
     q.birthday,
     q.telephone,
     q.mobile,
     q.address,
-    q.memberId
+    q.memberId,
+    q.password
     ])
     .then(([result]) => {
       output.success = true;
