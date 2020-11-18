@@ -95,13 +95,14 @@ router.post("/getMyCommemtList", async (req, res) => {
 
   const sql =
     "select distinct a.cartId , a.orderId , a.goodsId , a.goodsImgs , c.name , d.memberId , d.memberName "
-    + ",IFNULL((select e.comStars from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comStars "
-    + ",IFNULL((select e.comDesc from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDesc "
-    + ",IFNULL((select e.addDate from commentlist e where e.orderId=a.orderId and e.goodsId=a.goodsId order by addDate desc limit 1), '') as comDate "
+    + ",e.comStars "
+    + ",e.comDesc "
+    + ",e.addDate as comDate "
     + "from cartlist a "
     + "join orderlist b on a.orderId = b.orderId "
     + "join shopgoods c on a.goodsId = c.goodsId "
     + "join memberlist d on a.memberId = d.memberId "
+    + "left join (select ee.orderId , ee.goodsId , ee.comStars , ee.comDesc , ee.addDate from commentlist ee , cartlist aa where ee.orderId=aa.orderId and ee.goodsId=aa.goodsId order by ee.addDate desc limit 1) e on e.orderId = a.orderId and e.goodsId = a.goodsId "
     + "where 1 "
     + "and b.orderState = 3 "
     + "and a.memberId = ? ";
