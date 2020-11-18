@@ -55,34 +55,7 @@ router.post("/getHeartList", async (req, res) => {
 });
 
 //商品評價-商城版
-router.post("/getCommemtList", async (req, res) => {
-  console.log("商品評價-商城版 !!!")
-
-  const output = {
-    success: false,
-  };
- 
-  const sql =
-    "select distinct "
-    + "b.membername "
-    + ",b.memberPic "
-    + ",(select c.comStars from commentlist c where c.orderId=a.orderId and c.goodsId=a.goodsId order by addDate desc limit 1) as comStars "
-    + ",(select c.comDesc from commentlist c where c.orderId=a.orderId and c.goodsId=a.goodsId order by addDate desc limit 1) as comDesc "
-    + ",(select c.addDate from commentlist c where c.orderId=a.orderId and c.goodsId=a.goodsId order by addDate desc limit 1) as addDate "
-    + "from cartlist a "
-    + "join memberlist b on a.memberId = b.memberId "
-    + "where 1 "
-    + "and a.orderState = 3 "
-    + "and a.goodsId = ? "
-    + "and IFNULL((select c.comStars from commentlist c where c.orderId=a.orderId and c.goodsId=a.goodsId order by addDate limit 1), '') != '' ";
-  const [rs] = await db.query(sql, [req.body.goodsId]);
-  if (rs) {
-    req.session.admin = rs[0];
-    output.success = true;
-    output.data = rs;
-  }
-  res.json(output);
-});
+// is deleted
 
 
 //我的評價
