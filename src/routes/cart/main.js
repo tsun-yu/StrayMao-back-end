@@ -35,7 +35,7 @@ router.delete('/goods_heart', (req, res) => {
     const memberId = req.body.memberId;
     const goodsId = req.body.goodsId;
     const url = `DELETE FROM heartlist
-                  where itemId = ${goodsId} 
+                  where itemId = ${goodsId}  
                     and memberId = ${memberId}
                     and type = 1
                     `;
@@ -80,8 +80,8 @@ router.post('/cartinsert', (req, res) => {
 });
 
 //購物車列表
-router.get('/cartlist', (req, res) => {
-    const memberId = 100;//req.body.memberId;
+router.get('/cartlist/get/:memberId', (req, res) => {
+    const memberId = req.params.memberId;
 
     // console.log(typeof userId);
     // console.log(userId);
