@@ -23,15 +23,23 @@ router.post("/question", (req, res) => {
     req.body.arr[i] == 1 && taglist.push(i + 1);
   }
   let total = taglist.length;
-  console.log(taglist.length);
+  console.log(taglist);
 
   for (i = 0; i < total; i++) {
     i !== total - 1
       ? (insertValue += `(-1,${taglist[i]}),`)
       : (insertValue += `(-1,${taglist[i]})`);
   }
-  db.query(`INSERT INTO userPreference(memberId, tagId) VALUES` + insertValue);
-  res.json(req.body);
+  db.query(`DELETE FROM userPreference WHERE memberId=-1`)
+    .then(() => {
+      let sql =
+        `INSERT INTO userPreference(memberId, tagId) VALUES` + insertValue;
+      console.log(sql);
+      return db.query(sql);
+    })
+    .then(() => {
+      res.json(req.body);
+    });
 });
 
 module.exports = router;
