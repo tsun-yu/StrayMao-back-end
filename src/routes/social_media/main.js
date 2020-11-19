@@ -20,9 +20,10 @@ router.get('/try-db', (req, res)=>{
 //有分類和主題的文章(Forum_all)
 router.get('/get_forum_list/', (req, res) => {
   db.query(
-    `SELECT a.* , b.des as petType ,c.des as issueType
+    `SELECT a.* , b.des as petType ,c.des as issueType,d.memberName as memberName,d.memberPic as memberPic
      FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
      join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
+     join memberlist d on a.memberId = d.memberId
      WHERE 1 order by createAt DESC`
   ).then(([results]) => {
     results.forEach((e)=>{
@@ -60,9 +61,9 @@ router.post('/forum_add', (req, res) => {
   // const memberId = req.body.memberId;
   const talkTitle = req.body.talkTitle;
   const talkContent = req.body.talkContent;
-  // const talkPic = req.body.talkPic;
+  const talkPic = req.body.talkPic;
   const createAt = new Date();
-  const url =`INSERT INTO forumarticle(typeId, issueId, memberId, talkTitle, talkContent, talkPic,createAt) VALUES (${typeId},${issueId},3,${talkTitle},${talkContent},${talkPic},${createAt})`;
+  const url =`INSERT INTO forumarticle(typeId, issueId, talkTitle, talkContent, talkPic,createAt) VALUES (${typeId},${issueId},${talkTitle},${talkContent},${talkPic},${createAt})`;
   db.query(url).then(([results]) => {
     res.json({ data: results, results: 'success' });
   });
@@ -153,7 +154,9 @@ router.get("/get_forumUserTalkMessage", async (req, res) => {
 // 留言頁面(拿到資料)
 router.get("/get_forumUserTalkMessage/:id", async (req, res) => {
   db.query(
-    `SELECT * FROM forumreply WHERE talkId = ${req.params.id} ORDER BY replyId DESC`
+    `SELECT a.* , d.memberName as memberName,d.memberPic as memberPic
+     FROM forumreply a join memberlist d on a.memberId = d.memberId
+     WHERE talkId = ${req.params.id} ORDER BY replyId DESC`
   ).then(([results]) => {
     results.forEach((e)=>{
       e.createAt=moment(e.createAt).format("YYYY-MM-DD HH:mm")
@@ -169,9 +172,10 @@ router.post('/addForumCard', (req, res) => {
   const issueId = req.body.issueType;
   const memberId = req.body.memberId;
   const talkTitle = req.body.talkTitle;
+  const talkPic = req.body.talkPic;
   const talkContent = req.body.talkContent;
-  const url = `INSERT INTO forumarticle(typeId,issueId,memberId,talkTitle,talkContent) 
-  VALUES (${typeId},${issueId},${memberId},'${talkTitle}','${talkContent}')`;
+  const url = `INSERT INTO forumarticle(typeId,issueId,memberId,talkTitle,talkContent,talkPic) 
+  VALUES (${typeId},${issueId},${memberId},'${talkTitle}','${talkContent}','${talkPic}')`;
   console.log(url)
   db.query(url).then(([results]) => {
     res.json({ results, results: 'success' });
@@ -181,34 +185,46 @@ router.post('/addForumCard', (req, res) => {
 // ---------------------------分類查詢---------------------------
 //分類搜尋找全部
 router.get('/forum/news/all', (req, res)=>{
-    db.query(`SELECT a.* , b.des as petType ,c.des as issueType
+    db.query(`SELECT a.talkTitle , b.des as petType ,c.des as issueType
     FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
     join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
-    WHERE a.typeId=1 ORDER BY createAt DESC`)
+    ORDER BY createAt DESC limit 5`)
     .then(([results])=>{
         res.json(results);
     })    
 });
-//分類搜尋找貓
-router.get('/forum/news/cat', (req, res)=>{
-  db.query(`SELECT a.* , b.des as petType ,c.des as issueType
+
+//分類搜尋找全部
+router.get('/forum/hot/all', (req, res)=>{
+  db.query(`SELECT a.talkTitle , b.des as petType ,c.des as issueType
   FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
   join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
-  WHERE a.typeId=2 ORDER BY createAt DESC`)
+  ORDER BY clicks DESC limit 5`)
   .then(([results])=>{
       res.json(results);
   })    
 });
-//分類搜尋找狗
-router.get('/forum/news/dog', (req, res)=>{
-  db.query(`SELECT a.* , b.des as petType ,c.des as issueType
-  FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
-  join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
-  WHERE a.typeId=3 ORDER BY createAt DESC`)
-  .then(([results])=>{
-      res.json(results);
-  })    
-});
+
+// //分類搜尋找貓
+// router.get('/forum/news/cat', (req, res)=>{
+//   db.query(`SELECT a.* , b.des as petType ,c.des as issueType
+//   FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
+//   join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
+//   WHERE a.typeId=2 ORDER BY createAt DESC`)
+//   .then(([results])=>{
+//       res.json(results);
+//   })    
+// });
+// //分類搜尋找狗
+// router.get('/forum/news/dog', (req, res)=>{
+//   db.query(`SELECT a.* , b.des as petType ,c.des as issueType
+//   FROM forumarticle a join taglist b on a.typeId = b.linkTypeId and b.typeId = 2
+//   join taglist c on a.issueId = c.linkTypeId and c.typeId = 3
+//   WHERE a.typeId=3 ORDER BY createAt DESC`)
+//   .then(([results])=>{
+//       res.json(results);
+//   })    
+// });
 
 
 
@@ -334,7 +350,10 @@ router.post('/article_heart', (req, res) => {
   const url = `INSERT INTO heartList( type, memberId, itemId) 
                VALUES (2,${userId},${articleId}) `;
   db.query(url).then(([results]) => {
+   
+   
     res.json({ data: results, results: 'success' });
+
   });
 });
 
