@@ -58,7 +58,7 @@ router.post("/getHeartList", async (req, res) => {
 // is deleted
 
 
-//我的評價
+//取得我的評價
 router.post("/getMyCommemtList", async (req, res) => {
   console.log("get MyComment!!!!" , req.body.memberId)
 
@@ -86,6 +86,7 @@ router.post("/getMyCommemtList", async (req, res) => {
   res.json(output);
 });
 
+//新增我的評價
 router.post("/addMyCommemtList", upload.none(), async (req, res) => {
   let output = { success: false , msg: "" , data: [] };
   let obj = req.body;
@@ -119,6 +120,7 @@ router.post("/addMyCommemtList", upload.none(), async (req, res) => {
   });
 });
 
+//更新單筆評價
 router.post("/updMyCommemtList", upload.none(), async (req, res) => {
   let obj = req.body;
   const rsObj = {
@@ -149,31 +151,26 @@ router.post("/updMyCommemtList", upload.none(), async (req, res) => {
   res.json(rsObj);
 });
 
-router.post("/delMyCommemtList", upload.none(), async (req, res) => {
+//刪除評價
+router.post("/delMyCommemtList", async (req, res) => {
+  let output = { success: false , msg: "" , data: [] };
   let obj = req.body;
-  const rsObj = {
-    success : false,
-    msg: ''
-  }
- 
-  const sql = "delete from commentlist where commentId = ? ";
-  try{
-    const [{ affectedRows, changedRows }] = await db.query(sql, [
-      obj.commentId,
-    ]);
-
-    console.log(111 , affectedRows)
-    console.log(222 , changedRows)
-
-    if(affectedRows > 0){
-      rsObj.success = true,
-      rsObj.msg = "刪除了" + affectedRows + "筆資料";
-    }
-  }catch(error){
-    rsObj.msg = error
-  }
-
-  res.json(rsObj);
+  const sql = "delete from commentlist where orderId = ? and goodsId = ? and addMemberId = ? ";
+  db.query(sql, [
+    obj.orderId,
+    obj.goodsId,
+    obj.memberId,
+  ])
+  .then(([result]) => {
+    output.success = true;
+    output.data = result;
+    output.msg = result.info
+    res.json(output)
+  })
+  .catch((error) => {
+    output.msg = error;
+    res.json(output);
+  });
 });
 
 
